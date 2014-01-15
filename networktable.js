@@ -27,7 +27,6 @@ var parser = Dissolve().loop(function()
 {
         this.uint8("msgType").tap(function()
         {
-
                 if ( this.vars.msgType == 0x10 ) // Entry Assignment
                 {
                         function addNewEntry()

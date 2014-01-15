@@ -46,7 +46,6 @@ image_stream.on("data", function(imData)
                         contours.approxPolyDP(i, 7, true);
                         rect = contours.boundingRect(i);
                         rect.ratio = rect.width/rect.height;
-                        //console.log(rect);
                         if ( contours.cornerCount(i) == 4  && rect.ratio > 2 )
                         {
                                 hasTarget = true;
@@ -80,25 +79,24 @@ app.get("/target.mjpeg", function(req,res)
            'Connection': 'close',
            'Pragma': 'no-cache'
         });
+		
+		function (res)
+		{
+			var sendImage = setInterval(function(res)
+			{
+				res.write("--first\r\n");
 
-//      res.write(currentFrame.toBuffer(), "binary");
-//      res.end();
+				res.write("Content-type: image/jpeg\r\n");
+				res.write("Content-Length: "+currentFrame.toBuffer().length+"\r\n");
+				res.write("\r\n");
 
-        setInterval(function(res)
-        {
-//              console.log("called!");
-//              console.log(res);
-                res.write("--first\r\n");
-
-                res.write("Content-type: image/jpeg\r\n");
-                res.write("Content-Length: "+currentFrame.toBuffer().length+"\r\n");
-                res.write("\r\n");
-
-                res.write(currentFrame.toBuffer(), "binary");
-                res.write("\r\n");
-//              if ( !res )
-//                      res.end();
-        }, 200,res);
+				res.write(currentFrame.toBuffer(), "binary");
+				res.write("\r\n");
+			}, 200, res);
+			
+			res.connection.on('close', function() { clearInterval(sendImage); });
+		}(res);
+       
   }
 });
 
