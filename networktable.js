@@ -1,5 +1,5 @@
 var Dissolve = require("dissolve"),
-        Concentrate = require("concentrate"),
+    Concentrate = require("concentrate"),
     net = require("net");
 
 var entries = new Array();
@@ -60,10 +60,10 @@ var parser = Dissolve().loop(function()
 
                         this.uint16("entryID").
                         uint16("sequence").tap(function() {
-                                if ( typeof value == "boolean" )
-                                        this.uint8("value").tap(editExistingEntry);
-                                else if ( typeof value == "number" )
-                                        this.doublebe("value").tap(editExistingEntry);
+                            if ( this.vars.valueType == 0x00 )
+                                    this.uint8("value").tap(editExistingEntry);
+                            else if ( this.vars.valueType == 0x01 )
+                                    this.doublebe("value").tap(editExistingEntry);
                         });
                 }
         });
