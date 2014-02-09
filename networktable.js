@@ -91,6 +91,11 @@ exports.get = function(key, defaultValue)
         return defaultValue;
 };
 
+exports.getEntries = function()
+{
+	return entries;
+};
+
 exports.set = function(key, value)
 {
         var entry = undefined;

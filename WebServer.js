@@ -2,6 +2,8 @@ var http = require("http"),
     express = require("express"),
     app = express();
 
+
+var table = undefined;
 var currentFrame = undefined;
 var target_data = undefined;
 var cameraEvents = undefined;
@@ -95,9 +97,19 @@ app.get("/save", function(req,res)
 	res.send("Set");
 });
 
-
-exports.init = function()
+app.get("/networktable", function(req,res)
 {
+	res.render("networktable");
+});
+
+app.get("/vision", function(req,res)
+{
+	res.render("vision");
+});
+
+exports.init = function(networkTable)
+{
+	table = networkTable;
 	process.on("finishedProcessing", function(newFrame, data)
 	{
 		currentFrame = newFrame;

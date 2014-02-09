@@ -13,7 +13,7 @@ table.connect("10.2.25.2", function()
 	camera.set("CV_CAP_PROP_SATURATION", table.get("/Preferences/CV_CAP_PROP_SATURATION"));
 	camera.set("CV_CAP_PROP_HUE", table.get("/Preferences/CV_CAP_PROP_HUE"));
 	process.emit("finishedProcessing");
-	webServer.init();
+	webServer.init(table);
 });
 
 process.on("CVPropertyChange", function(key, value)
