@@ -1,40 +1,47 @@
 var cv = require("opencv"),
-        http = require("http"),
-        express = require("express"),
-        vapix = require('vapix'),
-        table = require('./networktable'),
-        app = express();
+    camera = new cv.VideoCapture(0),
+    table = require('./networktable'),
+    events = require('events'),
+    webServer = require("./WebServer.js");
 
-table.connect("10.2.25.2");
-
-var stream_options = {
-    resolution: '640x480',
-    compression: 30,
-    fps: 5
-}
-
-var camera = vapix.createCamera({
-  address: '10.2.25.11',
-  port: '80',
-  username: 'root',
-  password: 'frc225'
-});
-
-var image_stream = camera.createVideoStream(stream_options);
-
-var currentFrame = undefined;
 var target_data = {};
 
-var high_thresh = [120,255,255];
-var low_thresh = [55,90,20];
-
-
-image_stream.on("data", function(imData)
+table.connect("10.2.25.2", function()
 {
-        cv.readImage(imData, function(err, im)
-        {
+	camera.set("CV_CAP_PROP_BRIGHTNESS", table.get("/Preferences/CV_CAP_PROP_BRIGHTNESS"));
+	camera.set("CV_CAP_PROP_CONTRAST", table.get("/Preferences/CV_CAP_PROP_CONTRAST"));
+	camera.set("CV_CAP_PROP_SATURATION", table.get("/Preferences/CV_CAP_PROP_SATURATION"));
+	camera.set("CV_CAP_PROP_HUE", table.get("/Preferences/CV_CAP_PROP_HUE"));
+	process.emit("finishedProcessing");
+	webServer.init();
+});
+
+process.on("CVPropertyChange", function(key, value)
+{
+	console.log("change "+key+" to "+value);
+	try {
+		camera.set(key, value);
+		table.set("/Preferences/"+key, parseFloat(value));
+	} catch(e) {
+		console.log("Property Change Failed");
+	}
+});
+
+process.on("ThreshPropertyChange", function(key, value)
+{
+	table.set("/Preferences/"+key, parseFloat(value));
+});
+
+process.on("finishedProcessing", function()
+{
+	camera.read(function(err, im)
+	{
                 imCopy = im.copy();
                 im.convertHSVscale();
+
+		low_thresh = [table.get("HBottom", 55), table.get("SBottom", 90), table.get("VBottom", 20)];
+		high_thresh = [table.get("HTop", 120), table.get("STop", 255), table.get("VTop", 255)];
+
                 im.inRange(low_thresh, high_thresh);
                 im.erode(2);
                 im.dilate(3);
@@ -57,78 +64,18 @@ image_stream.on("data", function(imData)
                         else
                         {
                                 target_data = {};
-                        imCopy.drawContour(contours, i, [0,0,255]);
                         }
                 }
-                table.set("/test/hasTarget", hasTarget);
-                currentFrame = imCopy;
-        });
-});
+                table.set("/techfire/hasTarget", hasTarget);
+		process.emit("finishedProcessing", imCopy, target_data);
+	});
+}, 500);
 
-app.get("/target.mjpeg", function(req,res)
+process.on("saveSettings", function()
 {
-  if ( currentFrame == undefined )
-  {
-    res.send("no image");
-  }
-  else
-  {
-        res.writeHead(200, {
-            'Content-Type': 'multipart/x-mixed-replace; boundary=first',
-           'Cache-Control': 'no-cache',
-           'Connection': 'close',
-           'Pragma': 'no-cache'
-        });
-		
-		function (res)
-		{
-			var sendImage = setInterval(function(res)
-			{
-				res.write("--first\r\n");
-
-				res.write("Content-type: image/jpeg\r\n");
-				res.write("Content-Length: "+currentFrame.toBuffer().length+"\r\n");
-				res.write("\r\n");
-
-				res.write(currentFrame.toBuffer(), "binary");
-				res.write("\r\n");
-			}, 200, res);
-			
-			res.connection.on('close', function() { clearInterval(sendImage); });
-		}(res);
-       
-  }
+	table.set("/Preferences/~S A V E~", true);
 });
 
-app.get("/target.jpg", function(req,res)
-{
-  if ( currentFrame == undefined )
-  {
-    res.send("no image");
-  }
-  else
-  {
-        res.writeHead(200, {
-           'Cache-Control': 'no-cache',
-           'Connection': 'close',
-           'Pragma': 'no-cache'
-        });
+process.emit("finishedProcessing", undefined);
 
-        res.write(currentFrame.toBuffer(), "binary");
-        res.end();
-  }
-});
-
-
-app.get("/target.json", function(req,res)
-{
-        res.json(target_data);
-});
-
-app.get("/", function(req,res)
-{
-        res.send("<img src=\"/target.mjpeg\"></img>");
-});
-
-app.listen(8081);
 

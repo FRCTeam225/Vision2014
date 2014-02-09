@@ -1,6 +1,7 @@
 var Dissolve = require("dissolve"),
     Concentrate = require("concentrate"),
-    net = require("net");
+    net = require("net"),
+    events = require("events");
 
 var entries = new Array();
 
@@ -68,24 +69,26 @@ var parser = Dissolve().loop(function()
         });
 });
 
-exports.connect = function(host)
+exports.connect = function(host, connect)
 {
         sock = net.connect(1735, host, function()
         {
                 data = Concentrate().uint8(0x01).uint16be(512).result();
                 sock.write(data, "binary");
                 sock.pipe(parser);
+		if ( connect != undefined )
+			connect();
         });
 };
 
-exports.get = function(key)
+exports.get = function(key, defaultValue)
 {
         for ( k in entries )
         {
                 if (entries[k].key == key)
                         return entries[k].value;
         }
-        return undefined;
+        return defaultValue;
 };
 
 exports.set = function(key, value)

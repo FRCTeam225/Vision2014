@@ -5,7 +5,7 @@
   "dependencies": {
     "express": "*",
     "opencv": "*",
-    "vapix": "*"
+    "jshtml": "*"
   }
 }
 
