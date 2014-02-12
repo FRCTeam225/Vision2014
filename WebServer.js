@@ -1,26 +1,45 @@
-var http = require("http"),
-    express = require("express"),
-    app = express();
-
-
-var table = undefined;
-var currentFrame = undefined;
-var target_data = undefined;
-var cameraEvents = undefined;
-
+var express = require("express"),
+	app = express(),
+	table = require("./networktable"),
+	config = require("./config")
+	vision = require("./TargetTracker.js");
+	
 app.set("view engine", "ejs");
 app.use("/static", express.static("static"));
-
-
-
+	
 app.get("/", function(req,res)
 {
-        res.render("index");
+	res.render("index");
+});
+
+app.get("/vision", function(req,res)
+{
+	res.render("vision", {config: config});
+});
+
+app.get("/networktable", function(req,res)
+{
+	//res.render("networktable", {table: table.getEntries()});
+});
+
+app.get("/setProperty/:key/:value", function(req,res)
+{
+	config[req.param("key")] = req.param("value");
+	res.send("set");
+});
+
+app.get("/getProperty/:key", function(req,res)
+{
+	try {
+		res.send(config[req.param("key")]);
+	} catch (e) {
+		res.send("Key not found");
+	}
 });
 
 app.get("/target.mjpeg", function(req,res)
 {
-  if ( currentFrame == undefined )
+  if ( vision.getProcessedImage() == undefined )
   {
     res.send("no image");
   }
@@ -37,13 +56,14 @@ app.get("/target.mjpeg", function(req,res)
 		{
 			var sendImage = setInterval(function(res)
 			{
+				var currentImage = vision.getProcessedImage();
 				res.write("--first\r\n");
 
 				res.write("Content-type: image/jpeg\r\n");
-				res.write("Content-Length: "+currentFrame.toBuffer().length+"\r\n");
+				res.write("Content-Length: "+currentImage.toBuffer().length+"\r\n");
 				res.write("\r\n");
 
-				res.write(currentFrame.toBuffer(), "binary");
+				res.write(currentImage.toBuffer(), "binary");
 				res.write("\r\n");
 			}, 200, res);
 			
@@ -56,6 +76,7 @@ app.get("/target.mjpeg", function(req,res)
 
 app.get("/target.jpg", function(req,res)
 {
+  var currentFrame = vision.getProcessedImage();
   if ( currentFrame == undefined )
   {
     res.send("no image");
@@ -74,55 +95,7 @@ app.get("/target.jpg", function(req,res)
 });
 
 
-app.get("/target.json", function(req,res)
+exports.init = function()
 {
-        res.json(target_data);
-});
-
-app.get("/getProp/:prop", function(req, res)
-{
-	try {
-		res.send(target[req.param("prop")]);
-	} catch (e) {
-		res.send("Not found");
-	}
-});
-
-app.get("/setCVProp/:prop/:value", function(req,res)
-{
-	process.emit("CVPropertyChange", req.param("prop"), req.param("value"));
-	res.send("Set");
-});
-
-app.get("/setThreshProp/:prop/:value", function(req,res)
-{
-	process.emit("ThreshPropertyChange", req.param("prop"), req.param("value"));
-	res.send("Set");
-});
-
-app.get("/save", function(req,res)
-{
-	process.emit("saveSettings");
-	res.send("Set");
-});
-
-app.get("/networktable", function(req,res)
-{
-	res.render("networktable");
-});
-
-app.get("/vision", function(req,res)
-{
-	res.render("vision");
-});
-
-exports.init = function(networkTable)
-{
-	table = networkTable;
-	process.on("finishedProcessing", function(newFrame, data)
-	{
-		currentFrame = newFrame;
-		target_data = data;
-	});
-	app.listen(8081);
-}
+	app.listen(8080);
+};

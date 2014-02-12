@@ -1,10 +1,9 @@
 {
-	"CV_CAP_PROP_BRIGHTNESS": 0.5,
-	"CV_CAP_PROP_CONTRAST": 0.5,
-	"CV_CAP_PROP_SATURATION": 0.5,
-	"CV_CAP_PROP_HUE": 0.5,
+	"lowH": 55,
+	"lowS": 90,
+	"lowV": 20,
 	
-	"lowThresh": [55,90,20],
-	"highThresh": [120,255,255]
-	
+	"highH": 120,
+	"highS": 255,
+	"highV": 255
 }

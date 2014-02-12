@@ -21,35 +21,67 @@
     </nav>
     <br><br><br><br>
     <div class="container">
-		<img src="/target.mjpeg"></img><br>
-
-    	<table class="table">
-			<tr>
-				<th>CV_CAP_PROP_BRIGHTNESS</th>
-				<td><input type="range" class="cvprop" name="CV_CAP_PROP_BRIGHTNESS" min="0" max="2000"></td>
-			</tr>
-			<tr>
-				<th>CV_CAP_PROP_CONTRAST</th>
-				<td><input type="range" class="cvprop" name="CV_CAP_PROP_CONTRAST" min="0" max="2000"></th>
-			</tr>
-			<tr>
-				<th>CV_CAP_PROP_SATURATION</th>
-				<td><input type="range" class="cvprop" name="CV_CAP_PROP_SATURATION" min="0" max="2000"></td>
-			</tr>
-			<tr>
-				<th>CV_CAP_PROP_HUE</th>
-				<td><input type="range" class="cvprop" name="CV_CAP_PROP_HUE" min="0" max="2000"></td>
-			</tr>
-	</table>
-	
-	Hue Top Thresh <input type="range" class="thresh" name="HTop" min="0" max="180"><br>
-	Hue Bottom Thresh <input type="range" class="thresh" name="HBottom" min="0" max="180"><br><br>
-
-	Saturation Top Thresh <input type="range" class="thresh" name="STop" min="0" max="255"><br>
-	Saturation Bottom Thresh <input type="range" class="thresh" name="SBottom" min="0" max="255"><br><br>
-
-	Value Top Thresh <input type="range" class="thresh" name="VTop" min="0" max="255"><br>
-	Value Bottom Thresh <input type="range" class="thresh" name="VBottom" min="0" max="255"><br>
+		<img src="/target.mjpeg"></img>
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Label</th>
+					<th></th>
+					<th>Value</th>
+				</tr>
+			</thead>
+			
+			<tbody>
+				<tr>
+					<th>H High</th>
+					<td><input type="range" class="thresh" name="highH" min="0" max="180" value="<%= config.highH %>"></td>
+					<td id="highHvalue"><%= config.highH %></td>
+				</tr>
+				
+				<tr>
+					<th>H Low</th>
+					<td><input type="range" class="thresh" name="lowH" min="0" max="180" value="<%= config.lowH %>"></td>
+					<td id="lowHvalue"><%= config.lowH %></td>
+				</tr>
+				
+				<tr>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				
+				<tr>
+					<th>S High</th>
+					<td><input type="range" class="thresh" name="highS" min="0" max="180" value="<%= config.highS %>"></td>
+					<td id="highSvalue"><%= config.highS %></td>
+				</tr>
+				
+				<tr>
+					<th>S Low</th>
+					<td><input type="range" class="thresh" name="lowS" min="0" max="180" value="<%= config.lowS %>"></td>
+					<td id="lowSvalue"><%= config.lowS %></td>
+				</tr>
+				
+				<tr>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				
+				
+				<tr>
+					<th>V High</th>
+					<td><input type="range" class="thresh" name="highV" min="0" max="180" value="<%= config.highV %>"></td>
+					<td id="highVvalue"><%= config.highV %></td>
+				</tr>
+				
+				<tr>
+					<th>V Low</th>
+					<td><input type="range" class="thresh" name="lowV" min="0" max="180" value="<%= config.lowV %>"></td>
+					<td id="lowVvalue"><%= config.lowV %></td>
+				</tr>
+			</tbody>
+		</table>
     </div>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="static/jquery.js"></script>
@@ -62,18 +94,12 @@
 			$.get("/save");
 		});
 
-		$(".cvprop").change(function() {
-			propertyName = $(this).attr("name");
-			propertyValue = $(this).val()/2000;
-			console.log(propertyName+" is now "+propertyValue); 
-			$.get("/setCVProp/"+propertyName+"/"+propertyValue);		
-		});
-
 		$(".thresh").change(function() {
 			propertyName = $(this).attr("name");
 			propertyValue = $(this).val();
 			console.log(propertyName+" is now "+propertyValue); 
-			$.get("/setThreshProp/"+propertyName+"/"+propertyValue);		
+			$.get("/setProperty/"+propertyName+"/"+propertyValue);	
+			$("#"+propertyName+"value").text(propertyValue);	
 		});
 	</script>
 	
