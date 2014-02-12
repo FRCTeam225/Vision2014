@@ -29,6 +29,15 @@
 			</tr>
 		</thead>
 		<tbody>
+			<% for (var i = 0; i < exports.table.length; i++ ) 
+			{
+				thisEntry = exports.table[i];
+			%>
+			<tr>
+				<td><%= thisEntry.key %></td>
+				<td><%= thisEntry.value %></td>
+			</tr>
+			<% } %>
 		</tbody>
 	</table>
     </div>

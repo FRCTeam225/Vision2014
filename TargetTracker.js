@@ -2,26 +2,31 @@ var cv = require("opencv"),
     camera = new cv.VideoCapture(0),
     table = require('./networktable'),
     events = require('events'),
-    webServer = require("./WebServer.js");
+    webServer = require("./WebServer.js"),
+	fs = require("fs"),
+	config = JSON.parse(fs.readFileSync("config.json"));
 
 var target_data = {};
 
+var high_thresh = config.highThresh;
+var low_thresh = config.lowThresh;
+
+
+camera.set("CV_CAP_PROP_BRIGHTNESS", config.CV_CAP_PROP_BRIGHTNESS);
+camera.set("CV_CAP_PROP_CONTRAST", camera.CV_CAP_PROP_CONTRAST);
+camera.set("CV_CAP_PROP_SATURATION", camera.CV_CAP_PROP_SATURATION);
+camera.set("CV_CAP_PROP_HUE", camera.CV_CAP_PROP_HUE);
+
 table.connect("10.2.25.2", function()
 {
-	camera.set("CV_CAP_PROP_BRIGHTNESS", table.get("/Preferences/CV_CAP_PROP_BRIGHTNESS"));
-	camera.set("CV_CAP_PROP_CONTRAST", table.get("/Preferences/CV_CAP_PROP_CONTRAST"));
-	camera.set("CV_CAP_PROP_SATURATION", table.get("/Preferences/CV_CAP_PROP_SATURATION"));
-	camera.set("CV_CAP_PROP_HUE", table.get("/Preferences/CV_CAP_PROP_HUE"));
 	process.emit("finishedProcessing");
 	webServer.init(table);
 });
 
 process.on("CVPropertyChange", function(key, value)
 {
-	console.log("change "+key+" to "+value);
 	try {
 		camera.set(key, value);
-		table.set("/Preferences/"+key, parseFloat(value));
 	} catch(e) {
 		console.log("Property Change Failed");
 	}
@@ -38,9 +43,6 @@ process.on("finishedProcessing", function()
 	{
                 imCopy = im.copy();
                 im.convertHSVscale();
-
-		low_thresh = [table.get("HBottom", 55), table.get("SBottom", 90), table.get("VBottom", 20)];
-		high_thresh = [table.get("HTop", 120), table.get("STop", 255), table.get("VTop", 255)];
 
                 im.inRange(low_thresh, high_thresh);
                 im.erode(2);
@@ -70,11 +72,6 @@ process.on("finishedProcessing", function()
 		process.emit("finishedProcessing", imCopy, target_data);
 	});
 }, 500);
-
-process.on("saveSettings", function()
-{
-	table.set("/Preferences/~S A V E~", true);
-});
 
 process.emit("finishedProcessing", undefined);
 

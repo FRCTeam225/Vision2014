@@ -1,42 +1,82 @@
-<script type="text/javascript" src="static/jquery.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
 
-<img src="/target.mjpeg"></img><br>
-CV_CAP_PROP_BRIGHTNESS <input type="range" class="cvprop" name="CV_CAP_PROP_BRIGHTNESS" min="0" max="2000"><br>
-CV_CAP_PROP_CONTRAST <input type="range" class="cvprop" name="CV_CAP_PROP_CONTRAST" min="0" max="2000"><br>
-CV_CAP_PROP_SATURATION <input type="range" class="cvprop" name="CV_CAP_PROP_SATURATION" min="0" max="2000"><br>
-CV_CAP_PROP_HUE <input type="range" class="cvprop" name="CV_CAP_PROP_HUE" min="0" max="2000"><br>
-<br>
-<br>
-Hue Top Thresh <input type="range" class="thresh" name="HTop" min="0" max="180"><br>
-Hue Bottom Thresh <input type="range" class="thresh" name="HBottom" min="0" max="180"><br><br>
+    <!-- Bootstrap -->
+    <link href="static/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+  	<div class="container">
+    		<a class="navbar-brand" href="#">Team 225</a>
+	        <ul class="nav navbar-nav">
+	                <li><a href="/">Competition</a></li>
+	                <li><a href="/vision">Vision</a></li>
+	                <li><a href="/networktable">NetworkTable</a></li>
+	        </ul>
+  	</div>
+    </nav>
+    <br><br><br><br>
+    <div class="container">
+		<img src="/target.mjpeg"></img><br>
 
-Saturation Top Thresh <input type="range" class="thresh" name="STop" min="0" max="255"><br>
-Saturation Bottom Thresh <input type="range" class="thresh" name="SBottom" min="0" max="255"><br><br>
+    	<table class="table">
+			<tr>
+				<th>CV_CAP_PROP_BRIGHTNESS</th>
+				<td><input type="range" class="cvprop" name="CV_CAP_PROP_BRIGHTNESS" min="0" max="2000"></td>
+			</tr>
+			<tr>
+				<th>CV_CAP_PROP_CONTRAST</th>
+				<td><input type="range" class="cvprop" name="CV_CAP_PROP_CONTRAST" min="0" max="2000"></th>
+			</tr>
+			<tr>
+				<th>CV_CAP_PROP_SATURATION</th>
+				<td><input type="range" class="cvprop" name="CV_CAP_PROP_SATURATION" min="0" max="2000"></td>
+			</tr>
+			<tr>
+				<th>CV_CAP_PROP_HUE</th>
+				<td><input type="range" class="cvprop" name="CV_CAP_PROP_HUE" min="0" max="2000"></td>
+			</tr>
+	</table>
+	
+	Hue Top Thresh <input type="range" class="thresh" name="HTop" min="0" max="180"><br>
+	Hue Bottom Thresh <input type="range" class="thresh" name="HBottom" min="0" max="180"><br><br>
 
-Value Top Thresh <input type="range" class="thresh" name="VTop" min="0" max="255"><br>
-Value Bottom Thresh <input type="range" class="thresh" name="VBottom" min="0" max="255"><br>
+	Saturation Top Thresh <input type="range" class="thresh" name="STop" min="0" max="255"><br>
+	Saturation Bottom Thresh <input type="range" class="thresh" name="SBottom" min="0" max="255"><br><br>
 
-<br>
+	Value Top Thresh <input type="range" class="thresh" name="VTop" min="0" max="255"><br>
+	Value Bottom Thresh <input type="range" class="thresh" name="VBottom" min="0" max="255"><br>
+    </div>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="static/jquery.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="static/js/bootstrap.min.js"></script>
+	
+	<script type="text/javascript">
+		$("#save").click(function()
+		{
+			$.get("/save");
+		});
 
-<button id="save">Save Settings</button>
+		$(".cvprop").change(function() {
+			propertyName = $(this).attr("name");
+			propertyValue = $(this).val()/2000;
+			console.log(propertyName+" is now "+propertyValue); 
+			$.get("/setCVProp/"+propertyName+"/"+propertyValue);		
+		});
 
-<script type="text/javascript">
-	$("#save").click(function()
-	{
-		$.get("/save");
-	});
+		$(".thresh").change(function() {
+			propertyName = $(this).attr("name");
+			propertyValue = $(this).val();
+			console.log(propertyName+" is now "+propertyValue); 
+			$.get("/setThreshProp/"+propertyName+"/"+propertyValue);		
+		});
+	</script>
+	
+  </body>
+</html>
 
-	$(".cvprop").change(function() {
-		propertyName = $(this).attr("name");
-		propertyValue = $(this).val()/2000;
-		console.log(propertyName+" is now "+propertyValue); 
-		$.get("/setCVProp/"+propertyName+"/"+propertyValue);		
-	});
-
-	$(".thresh").change(function() {
-		propertyName = $(this).attr("name");
-		propertyValue = $(this).val();
-		console.log(propertyName+" is now "+propertyValue); 
-		$.get("/setThreshProp/"+propertyName+"/"+propertyValue);		
-	});
-</script>

@@ -79,6 +79,15 @@ app.get("/target.json", function(req,res)
         res.json(target_data);
 });
 
+app.get("/getProp/:prop", function(req, res)
+{
+	try {
+		res.send(target[req.param("prop")]);
+	} catch (e) {
+		res.send("Not found");
+	}
+});
+
 app.get("/setCVProp/:prop/:value", function(req,res)
 {
 	process.emit("CVPropertyChange", req.param("prop"), req.param("value"));
