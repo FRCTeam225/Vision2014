@@ -1,6 +1,5 @@
 var net = require('net');
 var vision = require("./TargetTracker.js")
-var targetState = false;
 
 var server = net.createServer(function(c)
 {
@@ -11,10 +10,5 @@ var server = net.createServer(function(c)
 });
 
 server.listen(1337);
-
-exports.setState = function(state)
-{
-	targetState = state;
-};
 
 

@@ -6,9 +6,9 @@
     "express": "*",
     "opencv": "*",
     "ejs": "*",
-	  "request": "*",
-	  "concentrate": "*",
-	  "dissolve": "*"
+    "request": "*",
+    "concentrate": "*",
+    "dissolve": "*"
   }
 }
 

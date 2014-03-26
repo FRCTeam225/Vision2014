@@ -40,7 +40,7 @@ exports.processImage = function(callback)
           	target_data = {};
   	    }
     	}
-	    callback(hasTarget, image);
+	    callback(image, hasTarget);
     });
   });
 };
