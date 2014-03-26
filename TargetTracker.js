@@ -1,57 +1,46 @@
 var cv = require("opencv"),
-	table = require("./networktable"),
 	webServer = require("./WebServer.js"),
 	fs = require("fs"),
 	config = require("./config"),
-	webServer = require("./WebServer.js");
+	webServer = require("./WebServer.js"),
+	request = require("request");
 	
 var processedImage = undefined;
 
-var options = {
-    resolution: '640x480',
-    compression: 25,
-    duration: 10,
-    fps: 10
-};
-
-var cv_stream = new cv.ImageDataStream();
-
-cv_stream.on("data", function(im)
+exports.processImage = function(callback)
 {
-    imCopy = im.copy();
-    im.convertHSVscale();
-
-    im.inRange([config.lowH, config.lowS, config.lowV], [config.highH, config.highS, config.highV]);
-    im.erode(2);
-    im.dilate(3);
-
-    var hasTarget = false;
-    contours = im.findContours();
-    for ( var i = 0; i < contours.size(); i++ )
+  request("http://10.2.25.11/mjpg/video.jpg", function (err, res, body)
+  {
+    cv.readImage(body, function (im)
     {
-            contours.approxPolyDP(i, 7, true);
-            rect = contours.boundingRect(i);
-            rect.ratio = rect.width/rect.height;
-            if ( contours.cornerCount(i) == 4  && rect.ratio > 2 )
-            {
-                    hasTarget = true;
-                    target_data = rect;
-                    console.log(rect);
-                    imCopy.drawContour(contours, i, [255,0,0]);
-                    break;
-            }
-            else
-            {
-                    target_data = {};
-            }
-    }
-	processedImage = imCopy;
-    table.set("/techfire/hasTarget", hasTarget);
-});
+	    imCopy = im.copy();
+	    im.convertHSVscale();
 
-camera.createVideoStream(options).pipe(cv_stream);
+	    im.inRange([config.lowH, config.lowS, config.lowV], [config.highH, config.highS, config.highV]);
+	    im.erode(2);
+	    im.dilate(3);
 
-exports.getProcessedImage = function()
-{
-	return processedImage;
+	    var hasTarget = false;
+	    contours = im.findContours();
+	    for ( var i = 0; i < contours.size(); i++ )
+	    {
+        contours.approxPolyDP(i, 7, true);
+        rect = contours.boundingRect(i);
+  	    rect.ratio = rect.width/rect.height;
+  	    if ( contours.cornerCount(i) == 4  && rect.ratio > 2 )
+  	    {
+          	hasTarget = true;
+          	target_data = rect;
+          	imCopy.drawContour(contours, i, [255,0,0]);
+          	break;
+  	    }
+  	    else
+  	    {
+            imCopy.drawContour(contours, i, [0,0,255]);
+          	target_data = {};
+  	    }
+    	}
+	    callback(hasTarget, image);
+    });
+  });
 };

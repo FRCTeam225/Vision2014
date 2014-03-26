@@ -9,7 +9,7 @@ app.use("/static", express.static("static"));
 	
 app.get("/", function(req,res)
 {
-	res.render("index");
+	res.redirect("/vision");
 });
 
 app.get("/vision", function(req,res)
@@ -19,7 +19,8 @@ app.get("/vision", function(req,res)
 
 app.get("/networktable", function(req,res)
 {
-	//res.render("networktable", {table: table.getEntries()});
+	console.log(table.getEntries());
+	res.render("networktable", {table: table.getEntries()});
 });
 
 app.get("/setProperty/:key/:value", function(req,res)
@@ -39,33 +40,30 @@ app.get("/getProperty/:key", function(req,res)
 
 app.get("/target.mjpeg", function(req,res)
 {
-  if ( vision.getProcessedImage() == undefined )
-  {
-    res.send("no image");
-  }
-  else
-  {
-        res.writeHead(200, {
-            'Content-Type': 'multipart/x-mixed-replace; boundary=first',
-           'Cache-Control': 'no-cache',
-           'Connection': 'close',
-           'Pragma': 'no-cache'
-        });
-		
+    res.writeHead(200, {
+        'Content-Type': 'multipart/x-mixed-replace; boundary=first',
+       'Cache-Control': 'no-cache',
+       'Connection': 'close',
+       'Pragma': 'no-cache'
+    });
+
 		function send(res)
 		{
 			var sendImage = setInterval(function(res)
 			{
-				var currentImage = vision.getProcessedImage();
-				res.write("--first\r\n");
+        vision.processImage(function(img, hasTarget)
+        {
+  				var currentImage = hasTarget.toBuffer();
+  				res.write("--first\r\n");
 
-				res.write("Content-type: image/jpeg\r\n");
-				res.write("Content-Length: "+currentImage.toBuffer().length+"\r\n");
-				res.write("\r\n");
+  				res.write("Content-type: image/jpeg\r\n");
+  				res.write("Content-Length: "+currentImage.length+"\r\n");
+  				res.write("\r\n");
 
-				res.write(currentImage.toBuffer(), "binary");
-				res.write("\r\n");
-			}, 200, res);
+  				res.write(currentImage, "binary");
+  				res.write("\r\n");
+        });
+			}, config.frameRequestRate, res);
 			
 			res.connection.on('close', function() { clearInterval(sendImage); });
 		}
@@ -76,26 +74,21 @@ app.get("/target.mjpeg", function(req,res)
 
 app.get("/target.jpg", function(req,res)
 {
-  var currentFrame = vision.getProcessedImage();
-  if ( currentFrame == undefined )
+  vision.processImage(function(img, hasTarget)
   {
-    res.send("no image");
-  }
-  else
-  {
-        res.writeHead(200, {
-           'Cache-Control': 'no-cache',
-           'Connection': 'close',
-           'Pragma': 'no-cache'
-        });
+    res.writeHead(200, {
+       'Cache-Control': 'no-cache',
+       'Connection': 'close',
+       'Pragma': 'no-cache'
+    });
 
-        res.write(currentFrame.toBuffer(), "binary");
-        res.end();
-  }
+    res.write(currentFrame.toBuffer(), "binary");
+    res.end();
+  });
 });
 
 
-exports.init = function()
-{
+//exports.init = function()
+//{
 	app.listen(8080);
-};
+//};

@@ -13,7 +13,6 @@
   	<div class="container">
     		<a class="navbar-brand" href="#">Team 225</a>
 	        <ul class="nav navbar-nav">
-	                <li><a href="/">Competition</a></li>
 	                <li><a href="/vision">Vision</a></li>
 	                <li><a href="/networktable">NetworkTable</a></li>
 	        </ul>
@@ -32,12 +31,17 @@
 			<% for (var i = 0; i < table.length; i++ ) 
 			{
 				thisEntry = table[i];
+				if ( typeof thisEntry == "object" )
+				{
 			%>
 			<tr>
 				<td><%= thisEntry.key %></td>
 				<td><%= thisEntry.value %></td>
 			</tr>
-			<% } %>
+			<% 
+				}
+			}
+			 %>
 		</tbody>
 	</table>
     </div>

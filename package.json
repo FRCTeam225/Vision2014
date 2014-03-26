@@ -1,14 +1,14 @@
 {
-  "name": "225vision2014",
+  "name": "Vision2014",
   "description": "Vision tracking for FRC team 225 in 2014",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "dependencies": {
     "express": "*",
     "opencv": "*",
     "ejs": "*",
-	"vapix": "*",
-	"concentrate": "*",
-	"dissolve": "*"
+	  "request": "*",
+	  "concentrate": "*",
+	  "dissolve": "*"
   }
 }
 

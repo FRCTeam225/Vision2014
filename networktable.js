@@ -23,6 +23,18 @@ function getAssignmentValueType(value)
         return 0x01;
 }
 
+var getByEntryID = function(entryID)
+{
+        for ( k in entries )
+        {
+		console.log(entries[k]);
+		console.log(entryID);
+                if (entries[k].entryID == entryID)
+                        return entries[k];
+        }
+        return undefined;
+};
+
 
 var parser = Dissolve().loop(function()
 {
@@ -32,6 +44,7 @@ var parser = Dissolve().loop(function()
                 {
                         function addNewEntry()
                         {
+				console.log(this.vars);
                                 entries[this.vars.entryID] = this.vars;
                                 this.vars = {};
                         }
@@ -60,9 +73,14 @@ var parser = Dissolve().loop(function()
 
                         this.uint16("entryID").
                         uint16("sequence").tap(function() {
-                            if ( this.vars.valueType == 0x00 )
+			    oldkey = getByEntryID(this.vars.entryID);
+                            console.log(oldkey);
+			    if ( oldkey.valueType == 0x00 )
+			    {
                                     this.uint8("value").tap(editExistingEntry);
-                            else if ( this.vars.valueType == 0x01 )
+                            		console.log("reading bool");
+			    }
+				else if ( oldkey.valueType == 0x01 )
                                     this.doublebe("value").tap(editExistingEntry);
                         });
                 }
@@ -75,9 +93,9 @@ exports.connect = function(host, connect)
         {
                 data = Concentrate().uint8(0x01).uint16be(512).result();
                 sock.write(data, "binary");
-                sock.pipe(parser);
+                //sock.pipe(parser);
 		if ( connect != undefined )
-			connect();
+			setTimeout(connect, 500);
         });
 };
 
@@ -132,6 +150,7 @@ exports.set = function(key, value)
                         data.doublebe(value);
         }
         d = data.result();
+	console.log(d);
         sock.write(d, "binary");
 };
 

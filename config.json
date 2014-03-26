@@ -5,5 +5,7 @@
 	
 	"highH": 120,
 	"highS": 255,
-	"highV": 255
+	"highV": 255,
+
+	"frameRequestRate": 500
 }

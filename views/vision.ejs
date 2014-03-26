@@ -13,7 +13,6 @@
   	<div class="container">
     		<a class="navbar-brand" href="#">Team 225</a>
 	        <ul class="nav navbar-nav">
-	                <li><a href="/">Competition</a></li>
 	                <li><a href="/vision">Vision</a></li>
 	                <li><a href="/networktable">NetworkTable</a></li>
 	        </ul>
@@ -22,7 +21,9 @@
     <br><br><br><br>
     <div class="container">
 		<img src="/target.mjpeg"></img>
-		<table class="table">
+		<br><br>
+		<button class="btn" id="showTuning">Edit Tuning Constants</button>
+		<table class="table" id="tuning">
 			<thead>
 				<tr>
 					<th>Label</th>
@@ -100,6 +101,13 @@
 			console.log(propertyName+" is now "+propertyValue); 
 			$.get("/setProperty/"+propertyName+"/"+propertyValue);	
 			$("#"+propertyName+"value").text(propertyValue);	
+		});
+
+		$("#tuning").hide();
+		$("#showTuning").click(function()
+		{
+			$("#tuning").show();
+			$("#showTurning").hide();
 		});
 	</script>
 	
